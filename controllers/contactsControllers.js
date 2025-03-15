@@ -58,3 +58,19 @@ export const updateContact = async (req, res, next) => {
         next(err);
     }
 };
+
+export const updateFavorite = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const contact = await contactsService.getContactById(id);
+        if (!contact) {
+            return res.status(404).json({ message: "Not found" });
+        }
+        const updatedContact = await contactsService.updateStatusContact(id, req.body);
+        res.status(200).json(updatedContact);
+    }
+    catch (err) {
+        console.log(err);
+        next(err);
+    }
+};
