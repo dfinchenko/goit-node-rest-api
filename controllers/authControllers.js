@@ -1,4 +1,4 @@
-import * as usersService from "../services/usersServices.js";
+import * as usersServices from "../services/usersServices.js";
 import sendEmail from "../services/emailsServices.js";
 import fs from "fs/promises";
 import path from "path";
@@ -6,7 +6,8 @@ import multer from "multer";
 
 export const register = async (req, res, next) => {
     try {
-        const newUser = await usersService.register(req.body);
+        const newUser = await usersServices.register(req.body);
+        await sendVerificationEmail(req, newUser.email, newUser.verificationToken);
         res.status(201).json({
             "user": {
                 "email": newUser.email,
@@ -22,7 +23,7 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
     try {
-        const signedUser = await usersService.login(req.body);
+        const signedUser = await usersServices.login(req.body);
         res.status(200).json({
             token: signedUser.token,
             user: {
@@ -45,7 +46,7 @@ export const logout = async (req, res, next) => {
             error.status = 401;
             throw error;
         }
-        await usersService.logout(user.id);
+        await usersServices.logout(user.id);
         res.status(204).json();
     }
     catch (err) {
@@ -125,7 +126,7 @@ export const updateAvatar = async (req, res, next) => {
 export const verifyUser = async (req, res, next) => {
     try {
         const { verificationToken } = req.params;
-        const user = await usersService.verifyUser(verificationToken);
+        const user = await usersServices.verifyUser(verificationToken);
 
         if (!user) {
             const error = new Error("User not found");
@@ -142,7 +143,7 @@ export const verifyUser = async (req, res, next) => {
 export const resendVerificationEmail = async (req, res, next) => {
     try {
         const userEmail = req.body.email;
-        const user = await usersService.findUserByEmail(userEmail);
+        const user = await usersServices.findUserByEmail(userEmail);
         if (!user) {
             const error = new Error("User not found");
             error.status = 404;
@@ -153,7 +154,7 @@ export const resendVerificationEmail = async (req, res, next) => {
             error.status = 400;
             throw error;
         }
-        const verificationToken = await usersService.getOrCreateVerificationToken(user);
+        const verificationToken = await usersServices.getOrCreateVerificationToken(user);
         await sendVerificationEmail(req, userEmail, verificationToken);
         res.status(200).json({ message: "Verification email sent" });
     } catch (err) {

@@ -14,8 +14,9 @@ export async function register(data) {
         throw error;
     }
     const hashedPassword = await hashPassword(password);
+    const verificationToken = nanoid();
     const avatarURL = gravatar.url(email, { protocol: 'https', s: '200' });
-    await User.create({ email, password: hashedPassword, avatarURL: avatarURL });
+    await User.create({ email, password: hashedPassword, avatarURL: avatarURL, verificationToken });
     return await User.findOne({ where: { email } });
 };
 
