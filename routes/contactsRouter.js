@@ -10,8 +10,11 @@ import {
 
 import { createContactSchema, updateContactSchema, updateFavoriteSchema } from "../schemas/contactsSchemas.js";
 import validateBody from "../helpers/validateBody.js";
+import isAuthenticated from "../middlewares/isAuthenticated.js";
 
 const contactsRouter = express.Router();
+
+contactsRouter.use(isAuthenticated);
 
 contactsRouter.get("/", getAllContacts);
 
