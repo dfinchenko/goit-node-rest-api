@@ -27,7 +27,13 @@ const Contact = dbConnection.define(
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
+    owner: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    }
 }
 );
+
+Contact.sync();
 
 export default Contact;
