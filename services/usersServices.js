@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import gravatar from "gravatar";
+import { nanoid } from 'nanoid';
 
 import User from '../models/users.js';
 
@@ -47,6 +48,35 @@ export async function findUserById(id) {
     return await User.findOne({ where: { id } });
 }
 
+export async function findUserByEmail(email) {
+    return await User.findOne({ where: { email } });
+}
+
 const hashPassword = async (password) => {
     return await bcrypt.hash(password, bcrypt.genSaltSync(10));
+}
+
+export const verifyUser = async (verificationToken) => {
+    const user = await User.findOne({ where: { verificationToken } });
+    if (user) {
+        user.verificationToken = null;
+        user.verify = true;
+        await user.save();
+    }
+    return user;
+};
+
+export const getOrCreateVerificationToken = async (user) => {
+    if (!user) {
+        const error = new Error("User not found");
+        error.status = 404;
+        throw error;
+    }
+    if (!user.verificationToken) {
+        const verificationToken = nanoid();
+        user.verificationToken = verificationToken;
+        await user.save();
+        return verificationToken;
+    }
+    return user.verificationToken;
 }
